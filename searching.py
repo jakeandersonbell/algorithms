@@ -2,17 +2,19 @@ import random
 import math
 import os
 
-seq = [random.randint(0, 256) for i in range(20)]
-
 
 # Sequential search returns the value and index
-def sequential_search(sequence, target):
+def linear_search(sequence, target, addition=False):
     found = False
     for i, v in enumerate(sequence):
         if v == target:
-            return v, i
+            res = "The target was found"
+            if addition:
+                pass
+                # res = res + " in addition"
+            return res
     if not found:
-        print("The target could not be found")
+        return "The target could not be found"
 
 
 def sort_iterator(sequence, reverse=False):
@@ -35,18 +37,49 @@ def sort_iterator(sequence, reverse=False):
 
 
 # Binary search
+# Need to revisit to figure out how to return index
 def binary_search(sequence, target):
     # Sort the list ascending
+    sequence = sequence.copy()
+    sequence = sort_iterator(sequence)
+    if 'iteration' not in locals():
+        iteration = 0
     half = len(sequence) // 2
-    while half > 0:
-        sequence = sort_iterator(sequence)
+    while bool(half):
+        iteration += 1
         if target == sequence[half]:
-            return True
+            return 'Found in ' + str(iteration) + ' iterations.'
         elif target > sequence[half]:
             return binary_search(sequence[half:], target)
         else:
             return binary_search(sequence[:half], target)
-    return False
+    return 'The target could not be found'
 
 
-binary_search([1, 2, 3, 4, 5, 6, 7, 8], 8)
+def jump_search(sequence, target):
+    sequence = sort_iterator(sequence.copy())
+    jump = round(math.sqrt(len(sequence)))
+    slices = [i * jump for i in range(len(sequence) // jump)]  # jump indices
+    for i, v in enumerate(slices):
+        if sequence[v] == target:
+            return 'The target was found'
+        elif v != slices[-1]:  # when not on last item; avoids index err
+            if sequence[slices[i + 1]] > target:
+                return linear_search(sequence[v:slices[i + 1]], target)
+        else:
+            return linear_search(sequence[v:], target)
+
+
+if __name__ == "__main__":
+    # seq = [random.randint(0, 256) for i in range(20)]
+    seq = [1, 2, 3, 4, 5, 6, 7, 8]
+
+    print("Linear Search:\n" + linear_search(seq, 6))  # True
+    print(linear_search(seq, 69) + "\n")  # False
+
+    print("Binary Search:\n" + binary_search(seq, 2))  # True
+    print(binary_search(seq, 2))  # True
+    print(binary_search(seq, 69) + "\n")  # False
+
+    print("Jump Search:\n" + jump_search(seq, 6))  # True
+    print(jump_search(seq, 69) + "\n")  # False
